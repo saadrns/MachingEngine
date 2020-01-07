@@ -127,7 +127,7 @@ CREATE TABLE `g_trade` (
   `price` decimal(32,16) NOT NULL,
   `size` decimal(32,16) NOT NULL,
   `side` varchar(255) NOT NULL,
-  `time` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `time`  timestamp NULL DEFAULT NULL,
   `log_offset` bigint(20) NOT NULL DEFAULT '0',
   `log_seq` bigint(20) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)

@@ -4,7 +4,7 @@
     "addr": "127.0.0.1:3306",
     "database": "spot",
     "user": "root",
-    "password": "root",
+    "password": "Hewlettpackard@123",
     "enableAutoMigrate": false
   },
   "redis": {
@@ -25,3 +25,5 @@
   },
   "jwtSecret": "flj23jfoi23apdl3jfslkj23za01mf3"
 }
+
+ 
