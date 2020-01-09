@@ -15,18 +15,22 @@
 package mysql
 
 import (
+	"fmt"
+	"time"
+
 	"github.com/gitbitex/gitbitex-spot/models"
 	"github.com/jinzhu/gorm"
-	"time"
 )
 
 func (s *Store) GetAccount(userId int64, currency string) (*models.Account, error) {
+	fmt.Println("excuting query for user ", userId)
 	var account models.Account
 	err := s.db.Raw("SELECT * FROM g_account WHERE user_id=? AND currency=?", userId,
 		currency).Scan(&account).Error
 	if err == gorm.ErrRecordNotFound {
 		return nil, nil
 	}
+	fmt.Println("account ", &account)
 	return &account, err
 }
 

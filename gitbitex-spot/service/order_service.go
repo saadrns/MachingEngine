@@ -17,11 +17,12 @@ package service
 import (
 	"errors"
 	"fmt"
+	"log"
+
 	"github.com/gitbitex/gitbitex-spot/models"
 	"github.com/gitbitex/gitbitex-spot/models/mysql"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/shopspring/decimal"
-	"log"
 )
 
 func PlaceOrder(userId int64, clientOid string, productId string, orderType models.OrderType, side models.Side,
@@ -106,8 +107,9 @@ func PlaceOrder(userId int64, clientOid string, productId string, orderType mode
 	if err != nil {
 		return nil, err
 	}
+	error := db.CommitTx()
+	return order, error
 
-	return order, db.CommitTx()
 }
 
 func UpdateOrderStatus(orderId int64, oldStatus, newStatus models.OrderStatus) (bool, error) {

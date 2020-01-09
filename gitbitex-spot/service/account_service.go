@@ -17,6 +17,7 @@ package service
 import (
 	"errors"
 	"fmt"
+
 	"github.com/gitbitex/gitbitex-spot/models"
 	"github.com/gitbitex/gitbitex-spot/models/mysql"
 	"github.com/shopspring/decimal"
@@ -85,6 +86,7 @@ func ExecuteBill(userId int64, currency string) error {
 }
 
 func HoldBalance(db models.Store, userId int64, currency string, size decimal.Decimal, billType models.BillType) error {
+	fmt.Println("===== start hold balance =====")
 	fmt.Println("db:", db)
 	fmt.Println("userId:", userId)
 	fmt.Println("size:", size)
@@ -92,14 +94,17 @@ func HoldBalance(db models.Store, userId int64, currency string, size decimal.De
 	if size.LessThanOrEqual(decimal.Zero) {
 		return errors.New("size less than 0")
 	}
-
+	fmt.Println("0*************************")
 	enough, err := HasEnoughBalance(userId, currency, size)
+	fmt.Println("1*************************")
 	if err != nil {
 		return err
 	}
 	if !enough {
 		return errors.New(fmt.Sprintf("no enough %v : request=%v", currency, size))
 	}
+
+	fmt.Println("2*************************")
 
 	account, err := db.GetAccountForUpdate(userId, currency)
 	if err != nil {
@@ -135,6 +140,7 @@ func HoldBalance(db models.Store, userId int64, currency string, size decimal.De
 }
 
 func HasEnoughBalance(userId int64, currency string, size decimal.Decimal) (bool, error) {
+	fmt.Println("Has enough balcne")
 	account, err := GetAccount(userId, currency)
 	if err != nil {
 		return false, err
@@ -142,10 +148,12 @@ func HasEnoughBalance(userId int64, currency string, size decimal.Decimal) (bool
 	if account == nil {
 		return false, nil
 	}
+	fmt.Println("Leaving  Has enough balcne")
 	return account.Available.GreaterThanOrEqual(size), nil
 }
 
 func GetAccount(userId int64, currency string) (*models.Account, error) {
+	fmt.Println("Enter get account")
 	return mysql.SharedStore().GetAccount(userId, currency)
 }
 

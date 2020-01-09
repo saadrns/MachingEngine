@@ -15,10 +15,11 @@
 package rest
 
 import (
-	"github.com/gin-gonic/gin"
-	"github.com/gitbitex/gitbitex-spot/service"
 	"net/http"
 	"time"
+
+	"github.com/gin-gonic/gin"
+	"github.com/gitbitex/gitbitex-spot/service"
 )
 
 // POST /users

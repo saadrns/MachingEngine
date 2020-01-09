@@ -16,12 +16,13 @@ package mysql
 
 import (
 	"fmt"
+	"reflect"
+	"sync"
+
 	"github.com/gitbitex/gitbitex-spot/conf"
 	"github.com/gitbitex/gitbitex-spot/models"
 	"github.com/jinzhu/gorm"
 	"github.com/prometheus/common/log"
-	"reflect"
-	"sync"
 )
 
 var gdb *gorm.DB
@@ -105,4 +106,10 @@ func (s *Store) Rollback() error {
 
 func (s *Store) CommitTx() error {
 	return s.db.Commit().Error
+}
+
+func (s *Store) Close() {
+	fmt.Println("***Closing connecton ********")
+	s.db.Close()
+	return
 }

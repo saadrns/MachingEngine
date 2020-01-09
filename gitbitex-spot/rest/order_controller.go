@@ -19,6 +19,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
+	"strconv"
+	"strings"
+	"sync"
+	"time"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gitbitex/gitbitex-spot/conf"
 	"github.com/gitbitex/gitbitex-spot/matching"
@@ -29,11 +35,6 @@ import (
 	"github.com/segmentio/kafka-go"
 	"github.com/shopspring/decimal"
 	"github.com/siddontang/go-log/log"
-	"net/http"
-	"strconv"
-	"strings"
-	"sync"
-	"time"
 )
 
 var productId2Writer sync.Map
@@ -71,9 +72,11 @@ func submitOrder(order *models.Order) {
 
 // POST /orders
 func PlaceOrder(ctx *gin.Context) {
+
 	fmt.Println("PlaceOrder:::")
 	var req placeOrderRequest
 	err := ctx.BindJSON(&req)
+
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, newMessageVo(err))
 		return
@@ -113,7 +116,6 @@ func PlaceOrder(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, newMessageVo(err))
 		return
 	}
-
 	submitOrder(order)
 
 	ctx.JSON(http.StatusOK, order)

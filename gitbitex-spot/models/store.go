@@ -18,6 +18,7 @@ type Store interface {
 	BeginTx() (Store, error)
 	Rollback() error
 	CommitTx() error
+	Close()
 
 	GetConfigs() ([]*Config, error)
 
