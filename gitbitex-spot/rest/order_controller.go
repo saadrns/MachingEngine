@@ -73,6 +73,9 @@ func submitOrder(order *models.Order) {
 // POST /orders
 func PlaceOrder(ctx *gin.Context) {
 
+	start := time.Now()
+	fmt.Println("start time  ============", start)
+
 	fmt.Println("PlaceOrder:::")
 	var req placeOrderRequest
 	err := ctx.BindJSON(&req)
@@ -109,6 +112,7 @@ func PlaceOrder(ctx *gin.Context) {
 	price := decimal.NewFromFloat(req.Price)
 	funds := decimal.NewFromFloat(req.Funds)
 	fmt.Println("size,price,funds:::", size, price, funds)
+
 	order, err := service.PlaceOrder(GetCurrentUser(ctx).Id, req.ClientOid, req.ProductId, orderType,
 		side, size, price, funds)
 	fmt.Println("Order::", order)
@@ -116,7 +120,14 @@ func PlaceOrder(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, newMessageVo(err))
 		return
 	}
+	t := time.Now()
+	elapsed := t.Sub(start)
+	fmt.Println("time elapsed  ============", elapsed)
 	submitOrder(order)
+
+	t = time.Now()
+	elapsed = t.Sub(start)
+	fmt.Println("time elapsed  2 ============", elapsed)
 
 	ctx.JSON(http.StatusOK, order)
 }

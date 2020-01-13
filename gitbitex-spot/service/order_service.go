@@ -90,12 +90,13 @@ func PlaceOrder(userId int64, clientOid string, productId string, orderType mode
 	}
 
 	// tx
-	db, err := mysql.SharedStore().BeginTx()
+	db := mysql.SharedStore()
+
 	fmt.Println("DB::", db)
 	if err != nil {
 		return nil, err
 	}
-	defer func() { _ = db.Rollback() }()
+	//	defer func() { _ = db.Rollback() }()
 
 	err = HoldBalance(db, userId, holdCurrency, holdSize, models.BillTypeTrade)
 	fmt.Println("err::", err)
@@ -107,8 +108,10 @@ func PlaceOrder(userId int64, clientOid string, productId string, orderType mode
 	if err != nil {
 		return nil, err
 	}
-	error := db.CommitTx()
-	return order, error
+
+	//error := db.CommitTx()
+
+	return order, nil
 
 }
 
