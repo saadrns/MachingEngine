@@ -15,9 +15,11 @@
 package mysql
 
 import (
+	"fmt"
+	"time"
+
 	"github.com/gitbitex/gitbitex-spot/models"
 	"github.com/jinzhu/gorm"
-	"time"
 )
 
 func (s *Store) GetOrderById(orderId int64) (*models.Order, error) {
@@ -84,6 +86,17 @@ func (s *Store) GetOrdersByUserId(userId int64, statuses []models.OrderStatus, s
 
 func (s *Store) AddOrder(order *models.Order) error {
 	order.CreatedAt = time.Now()
+	return s.db.Create(order).Error
+}
+func (s *Store) AddLendingOrder(order *models.LendingOrder) error {
+	order.CreatedAt = time.Now()
+	fmt.Println("AddLendingOrder:", order)
+	return s.db.Create(order).Error
+}
+
+func (s *Store) AddMarginOrder(order *models.MarginOrder) error {
+	order.CreatedAt = time.Now()
+	fmt.Println("Margin Margin Margin:", order)
 	return s.db.Create(order).Error
 }
 

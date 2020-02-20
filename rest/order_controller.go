@@ -17,8 +17,15 @@ package rest
 import (
 	"context"
 	"encoding/json"
-	"errors"
+
+	//"errors"
 	"fmt"
+	"net/http"
+	"strconv"
+	"strings"
+	"sync"
+	"time"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gitbitex/gitbitex-spot/conf"
 	"github.com/gitbitex/gitbitex-spot/matching"
@@ -29,26 +36,41 @@ import (
 	"github.com/segmentio/kafka-go"
 	"github.com/shopspring/decimal"
 	"github.com/siddontang/go-log/log"
-	"net/http"
-	"strconv"
-	"strings"
-	"sync"
-	"time"
 )
 
 var productId2Writer sync.Map
 
 func getWriter(productId string) *kafka.Writer {
+
 	writer, found := productId2Writer.Load(productId)
 	if found {
 		return writer.(*kafka.Writer)
 	}
 
 	gbeConfig := conf.GetConfig()
-
+	fmt.Println("Writ::::", productId, matching.TopicOrderPrefix)
 	newWriter := kafka.NewWriter(kafka.WriterConfig{
 		Brokers:      gbeConfig.Kafka.Brokers,
 		Topic:        matching.TopicOrderPrefix + productId,
+		Balancer:     &kafka.LeastBytes{},
+		BatchTimeout: 5 * time.Millisecond,
+	})
+	productId2Writer.Store(productId, newWriter)
+	return newWriter
+}
+
+func getLendWriter(productId string) *kafka.Writer {
+
+	writer, found := productId2Writer.Load(productId)
+	if found {
+		return writer.(*kafka.Writer)
+	}
+
+	gbeConfig := conf.GetConfig()
+	fmt.Println("Writ::::", productId, matching.TopicOrderPrefix)
+	newWriter := kafka.NewWriter(kafka.WriterConfig{
+		Brokers:      gbeConfig.Kafka.Brokers,
+		Topic:        matching.TopicLendOrderPrefix + productId,
 		Balancer:     &kafka.LeastBytes{},
 		BatchTimeout: 5 * time.Millisecond,
 	})
@@ -69,24 +91,46 @@ func submitOrder(order *models.Order) {
 	}
 }
 
+func submitLendingOrder(order *models.LendingOrder) {
+	buf, err := json.Marshal(order)
+	if err != nil {
+		log.Error(err)
+		return
+	}
+	fmt.Println("order.ProductId", order.ProductId, context.Background(), order)
+	err = getLendWriter(order.ProductId).WriteMessages(context.Background(), kafka.Message{Value: buf})
+	if err != nil {
+		log.Error(err)
+	}
+}
+
+func submitMarginOrder(order *models.MarginOrder) {
+	buf, err := json.Marshal(order)
+	if err != nil {
+		log.Error(err)
+		return
+	}
+	fmt.Println("order.ProductId", order.ProductId, context.Background(), buf)
+	err = getLendWriter(order.ProductId).WriteMessages(context.Background(), kafka.Message{Value: buf})
+	if err != nil {
+		log.Error(err)
+	}
+}
+
 // POST /orders
 func PlaceOrder(ctx *gin.Context) {
-	fmt.Println("PlaceOrder:::")
 	var req placeOrderRequest
 	err := ctx.BindJSON(&req)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, newMessageVo(err))
 		return
 	}
-	fmt.Println("REQ::", req)
 	side := models.Side(req.Side)
-	fmt.Println("side:::", side)
 	if len(side) == 0 {
 		side = models.SideBuy
 	}
 
 	orderType := models.OrderType(req.Type)
-	fmt.Println("orderType:::", orderType)
 	if len(orderType) == 0 {
 		orderType = models.OrderTypeLimit
 	}
@@ -105,10 +149,8 @@ func PlaceOrder(ctx *gin.Context) {
 	size := decimal.NewFromFloat(req.Size)
 	price := decimal.NewFromFloat(req.Price)
 	funds := decimal.NewFromFloat(req.Funds)
-	fmt.Println("size,price,funds:::", size, price, funds)
 	order, err := service.PlaceOrder(GetCurrentUser(ctx).Id, req.ClientOid, req.ProductId, orderType,
 		side, size, price, funds)
-	fmt.Println("Order::", order)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, newMessageVo(err))
 		return
@@ -141,7 +183,7 @@ func CancelOrder(ctx *gin.Context) {
 	}
 
 	if order == nil || order.UserId != GetCurrentUser(ctx).Id {
-		ctx.JSON(http.StatusNotFound, newMessageVo(errors.New("order not found")))
+		//	ctx.JSON(http.StatusNotFound, newMessageVo(errors.New("order not found")))
 		return
 	}
 
@@ -232,4 +274,89 @@ func GetOrders(ctx *gin.Context) {
 	ctx.Header("gbe-after", strconv.FormatInt(newAfter, 10))
 
 	ctx.JSON(http.StatusOK, orderVos)
+}
+
+// POST /Lending
+func PlaceLendingOrder(ctx *gin.Context) {
+	fmt.Println("111111111111111111")
+	var req placeLendingOrderRequest
+	err := ctx.BindJSON(&req)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, newMessageVo(err))
+		return
+	}
+	side := req.Side
+	// if len(side) == 0 {
+	// 	side = models.SideBuy
+	// }
+
+	// if len(orderType) == 0 {
+	// 	orderType = models.OrderTypeLimit
+	// }
+	fmt.Println("444444444444444")
+	//todo
+	//size, err := utils.StringToFloat64(req.size)
+	//price, err := utils.StringToFloat64(req.price)
+	size := decimal.NewFromFloat(req.Size)
+	rate := decimal.NewFromFloat(req.Rate)
+	duration := decimal.NewFromFloat(req.Duration)
+	autoRenew := req.AutoRenew
+	// let _rate = req.body.rate;
+	// let _symbol = req.body.symbol;
+	// let _userId =  req.auth.UserId;
+	// let _duration = req.body.duration;
+	// let _autoRenew = req.body.autoRenew;
+	fmt.Println("222222222222222222", req)
+	order, err := service.PlaceLendingOrder(GetCurrentUser(ctx).Id, req.ProductId, autoRenew,
+		side, size, rate, duration)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, newMessageVo(err))
+		return
+	}
+	fmt.Println("33333333333333333")
+	submitLendingOrder(order)
+
+	ctx.JSON(http.StatusOK, order)
+}
+
+// POST /orders
+func PlaceMarginOrder(ctx *gin.Context) {
+	fmt.Println("111111111111111111")
+	var req placeMarginOrderRequest
+	err := ctx.BindJSON(&req)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, newMessageVo(err))
+		return
+	}
+	//side := req.Side
+	// if len(side) == 0 {
+	// 	side = models.SideBuy
+	// }
+
+	// if len(orderType) == 0 {
+	// 	orderType = models.OrderTypeLimit
+	// }
+	//todo
+	//size, err := utils.StringToFloat64(req.size)
+	price := decimal.NewFromFloat(req.Price)
+	size := decimal.NewFromFloat(req.Size)
+	rate := decimal.NewFromFloat(req.Rate)
+	leverage := decimal.NewFromFloat(req.Leverage)
+	//category := req.Category
+	// let _rate = req.body.rate;
+	// let _symbol = req.body.symbol;
+	// let _userId =  req.auth.UserId;
+	// let _duration = req.body.duration;
+	// let _autoRenew = req.body.autoRenew;
+	fmt.Println("222222222222222222", req)
+	order, err := service.PlaceMarginOrder(GetCurrentUser(ctx).Id, req.ProductId, req.Type,
+		size, rate, price, leverage)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, newMessageVo(err))
+		return
+	}
+	fmt.Println("33333333333333333")
+	submitMarginOrder(order)
+
+	ctx.JSON(http.StatusOK, order)
 }

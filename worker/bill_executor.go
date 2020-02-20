@@ -22,6 +22,7 @@ import (
 	"github.com/go-redis/redis"
 	"github.com/siddontang/go-log/log"
 	"time"
+	"fmt"
 )
 
 type BillExecutor struct {
@@ -32,7 +33,7 @@ func NewBillExecutor() *BillExecutor {
 	f := &BillExecutor{
 		workerChs: [fillWorkerNum]chan *models.Bill{},
 	}
-
+	fmt.Println("NewBillExecutor:",f)
 	// 初始化和fillWorkersNum一样数量的routine，每个routine负责一个chan
 	for i := 0; i < fillWorkerNum; i++ {
 		f.workerChs[i] = make(chan *models.Bill, 256)

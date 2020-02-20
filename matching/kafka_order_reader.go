@@ -17,12 +17,15 @@ package matching
 import (
 	"context"
 	"encoding/json"
+	"fmt"
+
 	"github.com/gitbitex/gitbitex-spot/models"
 	"github.com/segmentio/kafka-go"
 )
 
 const (
-	TopicOrderPrefix = "matching_order_"
+	TopicOrderPrefix     = "matching_order_"
+	TopicLendOrderPrefix = "lending_order_"
 )
 
 type KafkaOrderReader struct {
@@ -35,6 +38,19 @@ func NewKafkaOrderReader(productId string, brokers []string) *KafkaOrderReader {
 	s.orderReader = kafka.NewReader(kafka.ReaderConfig{
 		Brokers:   brokers,
 		Topic:     TopicOrderPrefix + productId,
+		Partition: 0,
+		MinBytes:  1,
+		MaxBytes:  10e6,
+	})
+	return s
+}
+
+func NewLendKafkaOrderReader(productId string, brokers []string) *KafkaOrderReader {
+	s := &KafkaOrderReader{}
+
+	s.orderReader = kafka.NewReader(kafka.ReaderConfig{
+		Brokers:   brokers,
+		Topic:     TopicLendOrderPrefix + productId,
 		Partition: 0,
 		MinBytes:  1,
 		MaxBytes:  10e6,
@@ -57,5 +73,20 @@ func (s *KafkaOrderReader) FetchOrder() (offset int64, order *models.Order, err 
 		return 0, nil, err
 	}
 
+	return message.Offset, order, nil
+}
+
+func (s *KafkaOrderReader) FetchOrderLend() (offset int64, order *models.LendingOrder, err error) {
+	message, err := s.orderReader.FetchMessage(context.Background())
+	if err != nil {
+		return 0, nil, err
+	}
+
+	err = json.Unmarshal(message.Value, &order)
+	if err != nil {
+		return 0, nil, err
+	}
+	fmt.Println("message.Offset:", message.Offset)
+	fmt.Println("order:", order)
 	return message.Offset, order, nil
 }

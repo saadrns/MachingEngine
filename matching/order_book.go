@@ -17,11 +17,12 @@ package matching
 import (
 	"errors"
 	"fmt"
+	"math"
+
 	"github.com/emirpasic/gods/maps/treemap"
 	"github.com/gitbitex/gitbitex-spot/models"
 	"github.com/shopspring/decimal"
 	"github.com/siddontang/go-log/log"
-	"math"
 )
 
 const (
@@ -47,6 +48,23 @@ type orderBook struct {
 }
 
 type orderBookSnapshot struct {
+	// order book product id
+	ProductId string
+
+	// all orders
+	Orders []BookOrder
+
+	// trade seq at snapshot time
+	TradeSeq int64
+
+	// log seq at snapshot time
+	LogSeq int64
+
+	// state of de duplication window
+	OrderIdWindow Window
+}
+
+type lendOrderBookSnapshot struct {
 	// order book product id
 	ProductId string
 

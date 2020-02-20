@@ -17,12 +17,14 @@ package matching
 import (
 	"context"
 	"encoding/json"
-	"github.com/segmentio/kafka-go"
 	"time"
+
+	"github.com/segmentio/kafka-go"
 )
 
 const (
 	topicBookMessagePrefix = "matching_message_"
+	topicLendMessagePrefix = "lending_message_"
 )
 
 type KafkaLogStore struct {
@@ -35,6 +37,18 @@ func NewKafkaLogStore(productId string, brokers []string) *KafkaLogStore {
 	s.logWriter = kafka.NewWriter(kafka.WriterConfig{
 		Brokers:      brokers,
 		Topic:        topicBookMessagePrefix + productId,
+		Balancer:     &kafka.LeastBytes{},
+		BatchTimeout: 5 * time.Millisecond,
+	})
+	return s
+}
+
+func lendNewKafkaLogStore(productId string, brokers []string) *KafkaLogStore {
+	s := &KafkaLogStore{}
+
+	s.logWriter = kafka.NewWriter(kafka.WriterConfig{
+		Brokers:      brokers,
+		Topic:        topicLendMessagePrefix + productId,
 		Balancer:     &kafka.LeastBytes{},
 		BatchTimeout: 5 * time.Millisecond,
 	})

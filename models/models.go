@@ -16,8 +16,9 @@ package models
 
 import (
 	"fmt"
-	"github.com/shopspring/decimal"
 	"time"
+
+	"github.com/shopspring/decimal"
 )
 
 // 用于表示一笔订单或者交易的方向：买，卖
@@ -173,6 +174,47 @@ type Order struct {
 	TimeInForce   string
 	Status        OrderStatus
 	Settled       bool
+}
+type LendingOrder struct {
+	Id                int64 `gorm:"column:id;primary_key;AUTO_INCREMENT"`
+	CreatedAt         time.Time
+	UpdatedAt         time.Time
+	UserId            int64
+	ProductId         string
+	Size              decimal.Decimal `sql:"type:decimal(32,16);"`
+	Funds             decimal.Decimal `sql:"type:decimal(32,16);"`
+	FilledSize        decimal.Decimal `sql:"type:decimal(32,16);"`
+	ExecutedValue     decimal.Decimal `sql:"type:decimal(32,16);"`
+	FillFees          decimal.Decimal `sql:"type:decimal(32,16);"`
+	AutoRenew         bool
+	Duration          decimal.Decimal `sql:"type:decimal(32,16);"`
+	RemainingDuration decimal.Decimal `sql:"type:decimal(32,16);"`
+	Status            OrderStatus
+	Rate              decimal.Decimal `sql:"type:decimal(32,16);"`
+	Side              string
+	Settled           bool
+}
+
+type MarginOrder struct {
+	Id            int64 `gorm:"column:id;primary_key;AUTO_INCREMENT"`
+	UserId        int64
+	ProductId     string
+	Size          decimal.Decimal `sql:"type:decimal(32,16);"`
+	Status        OrderStatus
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
+	Funds         decimal.Decimal `sql:"type:decimal(32,16);"`
+	FilledSize    decimal.Decimal `sql:"type:decimal(32,16);"`
+	ExecutedValue decimal.Decimal `sql:"type:decimal(32,16);"`
+	FillFees      decimal.Decimal `sql:"type:decimal(32,16);"`
+	Rate          decimal.Decimal `sql:"type:decimal(32,16);"`
+	Side          string
+	Price         decimal.Decimal `sql:"type:decimal(32,16);"`
+	Type          string
+	Settled       bool
+	Category      string
+	Leverage      decimal.Decimal `sql:"type:decimal(32,16);"`
+	TriggerPrice  decimal.Decimal `sql:"type:decimal(32,16);"`
 }
 
 type Fill struct {

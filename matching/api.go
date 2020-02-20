@@ -25,6 +25,7 @@ type OrderReader interface {
 
 	// 拉取order
 	FetchOrder() (offset int64, order *models.Order, err error)
+	FetchOrderLend() (offset int64, order *models.LendingOrder, err error)
 }
 
 // 用于保存撮合日志

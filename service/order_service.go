@@ -17,17 +17,17 @@ package service
 import (
 	"errors"
 	"fmt"
+	"log"
+
 	"github.com/gitbitex/gitbitex-spot/models"
 	"github.com/gitbitex/gitbitex-spot/models/mysql"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/shopspring/decimal"
-	"log"
 )
 
 func PlaceOrder(userId int64, clientOid string, productId string, orderType models.OrderType, side models.Side,
 	size, price, funds decimal.Decimal) (*models.Order, error) {
 	product, err := GetProductById(productId)
-	fmt.Println("product:", product)
 	if err != nil {
 		return nil, err
 	}
@@ -37,17 +37,14 @@ func PlaceOrder(userId int64, clientOid string, productId string, orderType mode
 
 	if orderType == models.OrderTypeLimit {
 		size = size.Round(product.BaseScale)
-		fmt.Println("size:", size)
 		if size.LessThan(product.BaseMinSize) {
 			return nil, fmt.Errorf("size %v less than base min size %v", size, product.BaseMinSize)
 		}
 		price = price.Round(product.QuoteScale)
-		fmt.Println("price:", price)
 		if price.LessThan(decimal.Zero) {
 			return nil, fmt.Errorf("price %v less than 0", price)
 		}
 		funds = size.Mul(price)
-		fmt.Println("funds::", funds)
 	} else if orderType == models.OrderTypeMarket {
 		if side == models.SideBuy {
 			size = decimal.Zero
@@ -90,18 +87,15 @@ func PlaceOrder(userId int64, clientOid string, productId string, orderType mode
 
 	// tx
 	db, err := mysql.SharedStore().BeginTx()
-	fmt.Println("DB::", db)
 	if err != nil {
 		return nil, err
 	}
 	defer func() { _ = db.Rollback() }()
 
 	err = HoldBalance(db, userId, holdCurrency, holdSize, models.BillTypeTrade)
-	fmt.Println("err::", err)
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println("OrderAdd:", order)
 	err = db.AddOrder(order)
 	if err != nil {
 		return nil, err

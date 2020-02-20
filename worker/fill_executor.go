@@ -23,6 +23,7 @@ import (
 	lru "github.com/hashicorp/golang-lru"
 	"github.com/siddontang/go-log/log"
 	"time"
+	"fmt"
 )
 
 const fillWorkerNum = 10
@@ -36,7 +37,7 @@ func NewFillExecutor() *FillExecutor {
 	f := &FillExecutor{
 		workerChs: [fillWorkerNum]chan *models.Fill{},
 	}
-
+	fmt.Println("NewFillExecutor",f)
 	// 初始化和fillWorkersNum一样数量的routine，每个routine负责一个chan
 	for i := 0; i < fillWorkerNum; i++ {
 		f.workerChs[i] = make(chan *models.Fill, 512)
@@ -58,7 +59,7 @@ func NewFillExecutor() *FillExecutor {
 						log.Error(err)
 					}
 					if order == nil {
-						log.Warnf("order not found: %v", fill.OrderId)
+						//log.Warnf("order not found: %v", fill.OrderId)
 						continue
 					}
 					if order.Status == models.OrderStatusCancelled || order.Status == models.OrderStatusFilled {

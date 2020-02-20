@@ -17,6 +17,7 @@ package matching
 import (
 	"context"
 	"encoding/json"
+
 	"github.com/segmentio/kafka-go"
 	logger "github.com/siddontang/go-log/log"
 )
@@ -32,6 +33,17 @@ func NewKafkaLogReader(readerId, productId string, brokers []string) LogReader {
 	reader := kafka.NewReader(kafka.ReaderConfig{
 		Brokers:   brokers,
 		Topic:     topicBookMessagePrefix + productId,
+		Partition: 0,
+		MinBytes:  1,
+		MaxBytes:  10e6,
+	})
+	return &KafkaLogReader{readerId: readerId, productId: productId, reader: reader}
+}
+
+func LendNewKafkaLogReader(readerId, productId string, brokers []string) LogReader {
+	reader := kafka.NewReader(kafka.ReaderConfig{
+		Brokers:   brokers,
+		Topic:     topicLendMessagePrefix + productId,
 		Partition: 0,
 		MinBytes:  1,
 		MaxBytes:  10e6,

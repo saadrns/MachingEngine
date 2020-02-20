@@ -135,3 +135,22 @@ type OrderMessage struct {
 	Status        string `json:"status"`
 	Settled       bool   `json:"settled"`
 }
+
+// type loanMessage struct {
+// 	UserId        int64  `json:"userId"`
+// 	Type          string `json:"type"`
+// 	Sequence      int64  `json:"sequence"`
+// 	Id            string `json:"id"`
+// 	Price         string `json:"price"`
+// 	Size          string `json:"size"`
+// 	Funds         string `json:"funds"`
+// 	ProductId     string `json:"productId"`
+// 	Side          string `json:"side"`
+// 	OrderType     string `json:"orderType"`
+// 	CreatedAt     string `json:"createdAt"`
+// 	FillFees      string `json:"fillFees"`
+// 	FilledSize    string `json:"filledSize"`
+// 	ExecutedValue string `json:"executedValue"`
+// 	Status        string `json:"status"`
+// 	Settled       bool   `json:"settled"`
+// }

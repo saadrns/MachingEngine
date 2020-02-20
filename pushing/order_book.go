@@ -17,6 +17,9 @@ package pushing
 import (
 	"encoding/json"
 	"fmt"
+	"sync"
+	"time"
+
 	"github.com/emirpasic/gods/maps/treemap"
 	"github.com/gitbitex/gitbitex-spot/conf"
 	"github.com/gitbitex/gitbitex-spot/matching"
@@ -24,8 +27,6 @@ import (
 	"github.com/gitbitex/gitbitex-spot/utils"
 	"github.com/go-redis/redis"
 	"github.com/shopspring/decimal"
-	"sync"
-	"time"
 )
 
 const (

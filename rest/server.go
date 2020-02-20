@@ -15,8 +15,9 @@
 package rest
 
 import (
-	"github.com/gin-gonic/gin"
 	"io/ioutil"
+
+	"github.com/gin-gonic/gin"
 )
 
 type HttpServer struct {
@@ -49,6 +50,8 @@ func (server *HttpServer) Start() {
 	{
 		private.GET("/api/orders", GetOrders)
 		private.POST("/api/orders", PlaceOrder)
+		private.POST("/api/lendingOrders", PlaceLendingOrder)
+		private.POST("/api/marginOrders", PlaceMarginOrder)
 		private.DELETE("/api/orders/:orderId", CancelOrder)
 		private.DELETE("/api/orders", CancelOrders)
 		private.GET("/api/accounts", GetAccounts)

@@ -15,9 +15,10 @@
 package matching
 
 import (
+	"time"
+
 	"github.com/gitbitex/gitbitex-spot/models"
 	logger "github.com/siddontang/go-log/log"
-	"time"
 )
 
 type Engine struct {
@@ -67,6 +68,31 @@ type offsetOrder struct {
 }
 
 func NewEngine(product *models.Product, orderReader OrderReader, logStore LogStore, snapshotStore SnapshotStore) *Engine {
+	e := &Engine{
+		productId:            product.Id,
+		OrderBook:            NewOrderBook(product),
+		logCh:                make(chan Log, 10000),
+		orderCh:              make(chan *offsetOrder, 10000),
+		snapshotReqCh:        make(chan *Snapshot, 32),
+		snapshotApproveReqCh: make(chan *Snapshot, 32),
+		snapshotCh:           make(chan *Snapshot, 32),
+		snapshotStore:        snapshotStore,
+		orderReader:          orderReader,
+		logStore:             logStore,
+	}
+
+	// 获取最新的snapshot，并使用snapshot进行恢复
+	snapshot, err := snapshotStore.GetLatest()
+	if err != nil {
+		logger.Fatalf("get latest snapshot error: %v", err)
+	}
+	if snapshot != nil {
+		e.restore(snapshot)
+	}
+	return e
+}
+
+func lendNewEngine(product *models.Product, orderReader OrderReader, logStore LogStore, snapshotStore SnapshotStore) *Engine {
 	e := &Engine{
 		productId:            product.Id,
 		OrderBook:            NewOrderBook(product),

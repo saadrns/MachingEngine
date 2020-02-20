@@ -142,6 +142,78 @@ CREATE TABLE `g_user` (
   `password_hash` varchar(255) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `idx_email` (`email`)
+) ENGINE=InnoDB AUTO_INCREMENT=5820825 DEFAULT CHARSET=utf8;
+
+
+CREATE TABLE `g_lending_order` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `user_id` bigint(20) NOT NULL,
+  `product_id` varchar(255) NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `size` decimal(32,16) NOT NULL DEFAULT '0.0000000000000000',
+  `funds` decimal(32,16) NOT NULL DEFAULT '0.0000000000000000',
+  `auto_renew` tinyint(1) NOT NULL DEFAULT '0',
+  `duration` bigint(20) DEFAULT NULL,
+  `remaining_duration` bigint(20) DEFAULT NULL,
+  `status` varchar(255) NOT NULL,
+  `filled_size` decimal(32,16) NOT NULL DEFAULT '0.0000000000000000',
+  `executed_value` decimal(32,16) NOT NULL DEFAULT '0.0000000000000000',
+  `fill_fees` decimal(32,16) NOT NULL DEFAULT '0.0000000000000000',
+  `rate` decimal(32,16) NOT NULL DEFAULT '0.0000000000000000',
+  `side` varchar(255) NOT NULL,
+  `settled` tinyint(1) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (user_id) REFERENCES spot.g_user(id)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+
+
+CREATE TABLE `g_margin_order` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `user_id` bigint(20) NOT NULL,
+  `product_id` varchar(255) NOT NULL,
+  `size` decimal(32,16) NOT NULL,
+  `funds` decimal(32,16) NOT NULL DEFAULT '0.0000000000000000',
+  `status` varchar(255) NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `filled_size` decimal(32,16) NOT NULL DEFAULT '0.0000000000000000',
+  `executed_value` decimal(32,16) NOT NULL DEFAULT '0.0000000000000000',
+  `fill_fees` decimal(32,16) NOT NULL DEFAULT '0.0000000000000000',
+  `rate` decimal(32,16) NOT NULL DEFAULT '0.0000000000000000',
+  `side` varchar(255) NOT NULL,
+  `price` decimal(32,16) NOT NULL DEFAULT '0.0000000000000000',
+  `type` varchar(255) NOT NULL,
+  `settled` tinyint(1) NOT NULL DEFAULT '0',
+  `category` varchar(255) NOT NULL,
+  `leverage` decimal(32,16) NOT NULL DEFAULT '0.0000000000000000',
+  `trigger_price` decimal(32,16) NOT NULL DEFAULT '0.0000000000000000',
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (user_id) REFERENCES spot.g_user(id)
+) ENGINE=InnoDB AUTO_INCREMENT=41 DEFAULT CHARSET=utf8;
+
+
+CREATE TABLE `g_lending_trade` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `taker_order_id` bigint(20) NOT NULL,
+  `maker_order_id` bigint(20) NOT NULL,
+  `user_id` bigint(20) NOT NULL,
+  `order_monitoring_id` varchar(255) NOT NULL,
+  `lending_order_id` bigint(20) NOT NULL,
+  `product_id` bigint(20) NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `price` bigint(20) DEFAULT NULL,
+  `amount` bigint(20) DEFAULT NULL,
+  `status` varchar(255) NOT NULL,
+  `fee` bigint(20) DEFAULT NULL,
+  `filled` bigint(20) DEFAULT NULL,
+  `unfilled` bigint(20) DEFAULT NULL,
+  `rate` bigint(20) DEFAULT NULL,
+  `log_offset` varchar(255) NOT NULL,
+  `log_seq` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (user_id) REFERENCES spot.g_user(id)
 ) ENGINE=InnoDB AUTO_INCREMENT=41 DEFAULT CHARSET=utf8;
 
 

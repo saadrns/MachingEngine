@@ -16,11 +16,11 @@ package rest
 
 import (
 	"errors"
-	"fmt"
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gitbitex/gitbitex-spot/models"
 	"github.com/gitbitex/gitbitex-spot/service"
-	"net/http"
 )
 
 const keyCurrentUser = "__current_user"
@@ -40,13 +40,11 @@ func checkToken() gin.HandlerFunc {
 
 		// user, err := service.CheckToken(token)
 		user, err := service.GetUserByEmail("abc@gmail.com")
-		fmt.Println("user::", user)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, newMessageVo(err))
 			return
 		}
 		if user == nil {
-			fmt.Println("49 Auth:")
 			c.AbortWithStatusJSON(http.StatusForbidden, newMessageVo(errors.New("bad token")))
 			return
 		}

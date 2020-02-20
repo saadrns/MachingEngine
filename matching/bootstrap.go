@@ -15,6 +15,8 @@
 package matching
 
 import (
+	"fmt"
+
 	"github.com/gitbitex/gitbitex-spot/conf"
 	"github.com/gitbitex/gitbitex-spot/service"
 	"github.com/siddontang/go-log/log"
@@ -22,7 +24,7 @@ import (
 
 func StartEngine() {
 	gbeConfig := conf.GetConfig()
-
+	fmt.Println("StartEngine")
 	products, err := service.GetProducts()
 	if err != nil {
 		panic(err)
@@ -31,8 +33,12 @@ func StartEngine() {
 		orderReader := NewKafkaOrderReader(product.Id, gbeConfig.Kafka.Brokers)
 		snapshotStore := NewRedisSnapshotStore(product.Id)
 		logStore := NewKafkaLogStore(product.Id, gbeConfig.Kafka.Brokers)
+		lendlogStore := lendNewKafkaLogStore(product.Id, gbeConfig.Kafka.Brokers)
 		matchEngine := NewEngine(product, orderReader, logStore, snapshotStore)
+		lendorderReader := NewLendKafkaOrderReader(product.Id, gbeConfig.Kafka.Brokers)
+		lendmatchEngine := lendNewEngine(product, lendorderReader, lendlogStore, snapshotStore)
 		matchEngine.Start()
+		lendmatchEngine.Start()
 	}
 
 	log.Info("match engine ok")

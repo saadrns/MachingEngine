@@ -16,10 +16,11 @@ package rest
 
 import (
 	"fmt"
-	"github.com/gitbitex/gitbitex-spot/models"
-	"github.com/gitbitex/gitbitex-spot/utils"
 	"strings"
 	"time"
+
+	"github.com/gitbitex/gitbitex-spot/models"
+	"github.com/gitbitex/gitbitex-spot/utils"
 )
 
 type messageVo struct {
@@ -49,6 +50,26 @@ type placeOrderRequest struct {
 	Side        string  `json:"side"`
 	Type        string  `json:"type"`        // [optional] limit or market (default is limit)
 	TimeInForce string  `json:"timeInForce"` // [optional] GTC, GTT, IOC, or FOK (default is GTC)
+}
+
+type placeLendingOrderRequest struct {
+	AutoRenew bool    `json:"auto_renew"`
+	ProductId string  `json:"productId"`
+	Size      float64 `json:"size"`
+	Duration  float64 `json:"duration"`
+	Rate      float64 `json:"rate"`
+	Side      string  `json:"side"`
+}
+
+type placeMarginOrderRequest struct {
+	ProductId string  `json:"productId"`
+	Size      float64 `json:"size"`
+	Rate      float64 `json:"rate"`
+	Price     float64 `json:"price"`
+	Type      string  `json:"type"` // [optional] limit or Stop-Limit (default is limit)
+	Side      string  `json:"side"`
+	Category  string  `json:"category"`
+	Leverage  float64 `json:"leverage"`
 }
 
 type orderVo struct {

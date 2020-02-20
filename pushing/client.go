@@ -17,12 +17,13 @@ package pushing
 import (
 	"context"
 	"encoding/json"
-	"github.com/gitbitex/gitbitex-spot/service"
-	"github.com/gorilla/websocket"
-	"github.com/siddontang/go-log/log"
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"github.com/gitbitex/gitbitex-spot/service"
+	"github.com/gorilla/websocket"
+	"github.com/siddontang/go-log/log"
 )
 
 const (

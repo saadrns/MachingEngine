@@ -16,10 +16,11 @@ package pushing
 
 import (
 	"fmt"
-	"github.com/gitbitex/gitbitex-spot/matching"
-	logger "github.com/siddontang/go-log/log"
 	"sync"
 	"time"
+
+	"github.com/gitbitex/gitbitex-spot/matching"
+	logger "github.com/siddontang/go-log/log"
 )
 
 type OrderBookStream struct {

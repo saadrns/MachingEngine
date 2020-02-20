@@ -15,6 +15,8 @@
 package pushing
 
 import (
+	"fmt"
+
 	"github.com/gitbitex/gitbitex-spot/conf"
 	"github.com/gitbitex/gitbitex-spot/matching"
 	"github.com/gitbitex/gitbitex-spot/service"
@@ -22,6 +24,7 @@ import (
 )
 
 func StartServer() {
+	fmt.Println("StartServer")
 	gbeConfig := conf.GetConfig()
 
 	sub := newSubscription()
@@ -35,7 +38,8 @@ func StartServer() {
 	for _, product := range products {
 		newTickerStream(product.Id, sub, matching.NewKafkaLogReader("tickerStream", product.Id, gbeConfig.Kafka.Brokers)).Start()
 		newMatchStream(product.Id, sub, matching.NewKafkaLogReader("matchStream", product.Id, gbeConfig.Kafka.Brokers)).Start()
-		newOrderBookStream(product.Id, sub, matching.NewKafkaLogReader("orderBookStream", product.Id, gbeConfig.Kafka.Brokers)).Start()
+		newMatchStream(product.Id, sub, matching.NewKafkaLogReader("lendingStream", product.Id, gbeConfig.Kafka.Brokers)).Start()
+		newOrderBookStream(product.Id, sub, matching.LendNewKafkaLogReader("orderBookStream", product.Id, gbeConfig.Kafka.Brokers)).Start()
 	}
 
 	go NewServer(gbeConfig.PushServer.Addr, gbeConfig.PushServer.Path, sub).Run()
